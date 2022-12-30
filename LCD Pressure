@@ -1,0 +1,54 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+float P1 = analogRead(A0);
+float P2 = analogRead(A1);
+int AVGPRS;
+
+void setup() {
+  Wire.begin();
+  Wire.setClock(400000);
+  reset.setDebounceTime(10);
+  calibrate.setDebounceTime(10);
+  Serial.begin(19200);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  delay(500);
+  lcd.print("Loading...");
+  delay(1000);
+  lcd.setCursor(1, 2);
+  pinMode(P1, INPUT);
+  pinMode(P2, INPUT);
+  lcd.setCursor(0, 1);
+  lcd.print("Starting Devices...");
+  delay(1550);
+  lcd.clear();
+  
+}
+
+void loop() { 
+  calibrate.loop();
+  reset.loop();
+    int us = Serial.parseInt();
+    P1 = analogRead(A0);
+    P2 = analogRead(A1);
+  
+    if(Serial.available()==0){
+    lcd.setCursor(0, 1);
+    lcd.print("DragPrs: ");
+    lcd.setCursor(8, 1);
+    float avg = (P2 + P1)/2;
+    avg = map(avg, 0, 1024, 2000, 0);
+    avg = map(avg, 10, 2000, 0, 2000);
+    avg = constrain(avg, 0, 2000);
+    lcd.print(avg);
+    lcd.setCursor(14, 1);
+    lcd.print(" g"); 
+    }
+    
+  
+}
